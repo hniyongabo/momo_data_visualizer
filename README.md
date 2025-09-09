@@ -6,7 +6,7 @@ It has a user-friendly interface for analyzing and visualizing the processed dat
 ![Image](https://github.com/user-attachments/assets/41ecdc4d-067e-4c19-9790-126cf353f0e4)
 
 ## Scrum Board
-[Github Issues/Projects](https://github.com/hniyongabo/momo_data_visualizer/issues)
+[Github Issues/Projects](https://github.com/users/hniyongabo/projects/2)
 
 ## Members 
 - [Habeeb Dindi](https://github.com/dindihabeeb)
