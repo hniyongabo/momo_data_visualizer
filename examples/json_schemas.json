@@ -1,0 +1,241 @@
+
+# 1) Entities — JSON Schemas
+
+### User
+
+```json
+{
+  "$id": "User",
+  "type": "object",
+  "required": ["id", "phoneNumber", "userType", "currentBalance"],
+  "properties": {
+    "id": { "type": "integer" },
+    "phoneNumber": { "type": "string", "maxLength": 16 },
+    "oldBalance": { "type": "string" },
+    "currentBalance": { "type": "string" },
+    "userType": { "type": "string", "enum": ["personal", "merchant", "agent"] }
+  }
+}
+```
+
+### Message
+
+```json
+{
+  "$id": "Message",
+  "type": "object",
+  "required": ["id", "userId", "body"],
+  "properties": {
+    "id": { "type": "integer" },
+    "userId": { "type": "integer" },
+    "subject": { "type": "string" },
+    "body": { "type": "string", "maxLength": 1000 },
+    "smsProtocol": { "type": "string", "maxLength": 2 },
+    "address": { "type": "string" },
+    "contactName": { "type": "string" },
+    "read": { "type": "boolean" },
+    "subId": { "type": "string" }
+  }
+}
+```
+
+### Category
+
+```json
+{
+  "$id": "Category",
+  "type": "object",
+  "required": ["id", "transactionType", "paymentType"],
+  "properties": {
+    "id": { "type": "integer" },
+    "transactionType": { "type": "string" },
+    "paymentType": { "type": "string", "enum": ["DEBIT", "CREDIT"] }
+  }
+}
+```
+
+### Transaction
+
+```json
+{
+  "$id": "Transaction",
+  "type": "object",
+  "required": ["id", "messageId", "amount", "transactionDate", "status"],
+  "properties": {
+    "id": { "type": "integer" },
+    "messageId": { "type": "integer" },
+    "readableDate": { "type": "string" },
+    "toa": { "type": "string" },
+    "scToa": { "type": "string" },
+    "transactionDate": { "type": "integer" },
+    "amount": { "type": "string" },
+    "status": { "type": "boolean" },
+    "serviceCenterNumber": { "type": "string" },
+    "senderName": { "type": "string" },
+    "categories": { "type": "array", "items": { "$ref": "Category" } }
+  }
+}
+```
+
+### SystemLog
+
+```json
+{
+  "$id": "SystemLog",
+  "type": "object",
+  "required": ["id", "logText"],
+  "properties": {
+    "id": { "type": "integer" },
+    "logText": { "type": "string", "maxLength": 1000 },
+    "logTime": { "type": "string" }
+  }
+}
+```
+
+---
+
+# 2) Entity Examples
+
+### User (example)
+
+```json
+{
+  "id": 42,
+  "phoneNumber": "+250788110381",
+  "oldBalance": "0.00",
+  "currentBalance": "2000.00",
+  "userType": "personal"
+}
+```
+
+### Message (example)
+
+```json
+{
+  "id": 101,
+  "userId": 42,
+  "subject": null,
+  "body": "You have received 2000 RWF from Jane Smith ...",
+  "smsProtocol": "0",
+  "address": "M-Money",
+  "contactName": "(Unknown)",
+  "read": true,
+  "subId": "6"
+}
+```
+
+### Category (examples)
+
+```json
+{ "id": 1, "transactionType": "1", "paymentType": "CREDIT" }
+```
+
+```json
+{ "id": 2, "transactionType": "1", "paymentType": "DEBIT" }
+```
+
+### Transaction (stand-alone example)
+
+```json
+{
+  "id": 76662021700,
+  "messageId": 101,
+  "readableDate": "10 May 2024 4:30:58 PM",
+  "toa": null,
+  "scToa": null,
+  "transactionDate": 1715351458724,
+  "amount": "2000.00",
+  "status": true,
+  "serviceCenterNumber": "+250788110381",
+  "senderName": "M-Money",
+  "categories": [{ "id": 1, "transactionType": "1", "paymentType": "CREDIT" }]
+}
+```
+
+---
+
+# 3) Complex Aggregated Object (complete transaction view)
+
+```json
+{
+  "transaction": {
+    "id": 73214484437,
+    "messageId": 102,
+    "readableDate": "10 May 2024 4:31:46 PM",
+    "transactionDate": 1715351506754,
+    "amount": "1000.00",
+    "status": true,
+    "serviceCenterNumber": "+250788110381",
+    "senderName": "M-Money",
+    "categories": [
+      { "id": 2, "transactionType": "1", "paymentType": "DEBIT" }
+    ]
+  },
+  "message": {
+    "id": 102,
+    "userId": 42,
+    "address": "M-Money",
+    "subject": null,
+    "body": "TxId: 73214484437. Your payment of 1,000 RWF to Jane Smith ...",
+    "read": true,
+    "smsProtocol": "0",
+    "subId": "6",
+    "contactName": "(Unknown)"
+  },
+  "user": {
+    "id": 42,
+    "phoneNumber": "+250788110381",
+    "userType": "personal",
+    "oldBalance": "2000.00",
+    "currentBalance": "1000.00"
+  },
+  "audit": {
+    "logs": [
+      { "id": 9001, "logText": "Parsed P2P send", "logTime": "2024-05-10T16:31:47Z" }
+    ]
+  }
+}
+```
+
+---
+
+# 4) SQL → JSON Mapping
+
+| SQL Table.Column                    | JSON path (field)                          |
+| ----------------------------------- | ------------------------------------------ |
+| **USER.user\_id**                   | `user.id`                                  |
+| USER.phone\_number                  | `user.phoneNumber`                         |
+| USER.old\_balance                   | `user.oldBalance`                          |
+| USER.current\_balance               | `user.currentBalance`                      |
+| USER.user\_type                     | `user.userType`                            |
+| **MESSAGE.sms\_id**                 | `message.id`                               |
+| MESSAGE.user\_id (FK)               | `message.userId`                           |
+| MESSAGE.Subject                     | `message.subject`                          |
+| MESSAGE.Body                        | `message.body`                             |
+| MESSAGE.sms\_protocol               | `message.smsProtocol`                      |
+| MESSAGE.Address                     | `message.address`                          |
+| MESSAGE.Contact\_name               | `message.contactName`                      |
+| MESSAGE.read                        | `message.read`                             |
+| MESSAGE.sub\_id                     | `message.subId`                            |
+| **Transaction.Transaction\_Id**     | `transaction.id`                           |
+| Transaction.message\_id (FK)        | `transaction.messageId`                    |
+| Transaction.Readable\_date          | `transaction.readableDate`                 |
+| Transaction.Toa                     | `transaction.toa`                          |
+| Transaction.Sc\_toa                 | `transaction.scToa`                        |
+| Transaction.Transaction\_date       | `transaction.transactionDate`              |
+| Transaction.Amount                  | `transaction.amount` (stringified decimal) |
+| Transaction.Status                  | `transaction.status`                       |
+| Transaction.Service\_center\_number | `transaction.serviceCenterNumber`          |
+| Transaction.Sender\_name            | `transaction.senderName`                   |
+| **CATEGORY.id**                     | `transaction.categories[].id`              |
+| CATEGORY.Transaction\_type          | `transaction.categories[].transactionType` |
+| CATEGORY.Payment\_type              | `transaction.categories[].paymentType`     |
+| **Transaction\_Category**           | Joins `transaction.id` ↔ `categories[].id` |
+| **SYSTEM\_LOGS.Id**                 | `audit.logs[].id`                          |
+| SYSTEM\_LOGS.Log\_text              | `audit.logs[].logText`                     |
+| SYSTEM\_LOGS.Log\_time              | `audit.logs[].logTime`                     |
+
+**Notes**
+
+* Money values are serialized as **strings** to preserve decimal precision across clients.
+* The “complete transaction view” is an API composition that nests `transaction`, `message`, `user`, and optional `audit.logs`.
