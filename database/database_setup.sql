@@ -63,7 +63,7 @@ CREATE TABLE `message` (
   `sub_id` int DEFAULT NULL,
   PRIMARY KEY (`message_id`),
   UNIQUE KEY `transaction_id` (`transaction_id`),
-  CONSTRAINT `fk_message_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transaction_record` (`transaction_id`) ON DELETE CASCADE
+  CONSTRAINT `fk_message_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -113,7 +113,7 @@ CREATE TABLE `transaction_category` (
   PRIMARY KEY (`transaction_id`,`category_id`),
   KEY `fk_tc_category` (`category_id`),
   CONSTRAINT `fk_tc_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_tc_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transaction_record` (`transaction_id`) ON DELETE CASCADE
+  CONSTRAINT `fk_tc_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`transaction_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -127,13 +127,13 @@ LOCK TABLES `transaction_category` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `transaction_record`
+-- Table structure for table `transaction`
 --
 
-DROP TABLE IF EXISTS `transaction_record`;
+DROP TABLE IF EXISTS `transaction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `transaction_record` (
+CREATE TABLE `transaction` (
   `transaction_id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `transaction_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -152,12 +152,12 @@ CREATE TABLE `transaction_record` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `transaction_record`
+-- Dumping data for table `transaction`
 --
 
-LOCK TABLES `transaction_record` WRITE;
-/*!40000 ALTER TABLE `transaction_record` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transaction_record` ENABLE KEYS */;
+LOCK TABLES `transaction` WRITE;
+/*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
+/*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -184,13 +184,70 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'0780000001',12000.00,41000.00,'personal');
-INSERT INTO `user` VALUES (2,'0780000006',12000.00,11000.00,'personal');
-INSERT INTO `user` VALUES (3,'0780000005',11000.00,11000.00,'personal');
-INSERT INTO `user` VALUES (4,'0780000003',13000.00,21000.00,'personal');
-INSERT INTO `user` VALUES (5,'0780000002',16000.00,31000.00,'personal');
+INSERT INTO `user` (user_id, phone_number, old_balance, current_balance, user_type) VALUES
+(6,'0781110001',5000.00,15000.00,'personal'),
+(7,'0781110002',2000.00,5000.00,'merchant'),
+(8,'0781110003',10000.00,8000.00,'agent'),
+(9,'0781110004',0.00,2500.00,'personal'),
+(10,'0781110005',7500.00,12500.00,'merchant');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
+
+LOCK TABLES `category` WRITE;
+/*!40000 ALTER TABLE `category` DISABLE KEYS */;
+INSERT INTO `category` (category_id, transaction_type, payment_type) VALUES
+(1,'DEBIT','CASH'),
+(2,'CREDIT','CASH'),
+(3,'DEBIT','MoMoPay'),
+(4,'CREDIT','MoMoPay'),
+(5,'DEBIT','Airtime');
+/*!40000 ALTER TABLE `category` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `transaction` WRITE;
+/*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
+INSERT INTO `transaction` (transaction_id, user_id, transaction_date, toa, sc_toa, readable_date, amount, status, service_center_number, sender_name) VALUES
+(1,6,'2024-05-10 16:30:51','wallet','sc1','2024-05-10',2000.00,'COMPLETED','+250788110381','M-Money'),
+(2,7,'2024-05-11 09:15:22','wallet','sc2','2024-05-11',1000.00,'COMPLETED','+250788110382','M-Money'),
+(3,8,'2024-05-12 18:45:13','wallet','sc3','2024-05-12',500.00,'FAILED','+250788110383','M-Money'),
+(4,9,'2024-05-13 12:05:44','wallet','sc4','2024-05-13',3000.00,'COMPLETED','+250788110384','M-Money'),
+(5,10,'2024-05-14 20:10:59','wallet','sc5','2024-05-14',1500.00,'PENDING','+250788110385','M-Money');
+/*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `message` WRITE;
+/*!40000 ALTER TABLE `message` DISABLE KEYS */;
+INSERT INTO `message` (message_id, transaction_id, is_read, subject, body, sms_protocol, address, contact_name, sub_id) VALUES
+(1,1,1,NULL,'You have received 2000 RWF from Jane.','0','M-Money','(Unknown)',6),
+(2,2,1,NULL,'Your payment of 1000 RWF to Shop Ltd is complete.','0','M-Money','Shop Ltd',6),
+(3,3,0,NULL,'Transaction of 500 RWF failed.','0','M-Money','(Unknown)',6),
+(4,4,1,NULL,'You have received 3000 RWF from John.','0','M-Money','John Doe',6),
+(5,5,0,NULL,'Your payment of 1500 RWF is pending.','0','M-Money','(Unknown)',6);
+/*!40000 ALTER TABLE `message` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `transaction_category` WRITE;
+/*!40000 ALTER TABLE `transaction_category` DISABLE KEYS */;
+INSERT INTO `transaction_category` (transaction_id, category_id) VALUES
+(1,2),
+(2,1),
+(3,3),
+(4,2),
+(5,5);
+/*!40000 ALTER TABLE `transaction_category` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `system_logs` WRITE;
+/*!40000 ALTER TABLE `system_logs` DISABLE KEYS */;
+INSERT INTO `system_logs` (log_id, log_text, log_time) VALUES
+(1,'Parsed transaction 1','2024-05-10 16:31:00'),
+(2,'Parsed transaction 2','2024-05-11 09:16:00'),
+(3,'Transaction 3 failed','2024-05-12 18:46:00'),
+(4,'Transaction 4 credited','2024-05-13 12:06:00'),
+(5,'Transaction 5 pending','2024-05-14 20:11:00');
+/*!40000 ALTER TABLE `system_logs` DISABLE KEYS */;
+UNLOCK TABLES;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
