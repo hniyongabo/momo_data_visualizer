@@ -30,7 +30,7 @@ JOIN transaction t ON m.sms_id = t.message_id
 JOIN transaction_category tc ON t.transaction_id = tc.transaction_id
 JOIN category c ON tc.category_id = c.id
 WHERE c.payment_type = 'DEBIT'
-GROUP BY u.phone_number;
+GROUP BY u.phone_number;```
 
 ## Scrum Board
 [Github Issues/Projects](https://github.com/users/hniyongabo/projects/2)
