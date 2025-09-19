@@ -5,6 +5,33 @@ It has a user-friendly interface for analyzing and visualizing the processed dat
 ## Architecture Diagram
 ![Image](https://github.com/user-attachments/assets/41ecdc4d-067e-4c19-9790-126cf353f0e4)
 
+## Database Documentation
+
+The system uses a relational schema designed for accuracy, scalability, and auditability:
+
+- *USER*: Stores phone numbers, balances, and user type (personal, merchant, agent).  
+- *MESSAGE*: Holds raw SMS content linked to a user.  
+- *TRANSACTION*: Parsed transaction details (amount, status, timestamps) linked back to messages.  
+- *CATEGORY*: Defines transaction types and whether they are debit/credit.  
+- *TRANSACTION_CATEGORY*: Many-to-many relationship mapping transactions to categories.  
+- *SYSTEM_LOGS*: Records system and parsing events for traceability.  
+
+*Key rules:*  
+- Phone numbers and transaction IDs must be unique.  
+- Amounts must be positive, and balances cannot drop below zero.  
+- Referential integrity is enforced with foreign keys.  
+
+*Example query:*  
+```sql
+SELECT u.phone_number, SUM(t.amount) AS total_spent
+FROM user u
+JOIN message m ON u.user_id = m.user_id
+JOIN transaction t ON m.sms_id = t.message_id
+JOIN transaction_category tc ON t.transaction_id = tc.transaction_id
+JOIN category c ON tc.category_id = c.id
+WHERE c.payment_type = 'DEBIT'
+GROUP BY u.phone_number;
+
 ## Scrum Board
 [Github Issues/Projects](https://github.com/users/hniyongabo/projects/2)
 
