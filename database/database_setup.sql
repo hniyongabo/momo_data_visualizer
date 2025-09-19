@@ -143,7 +143,7 @@ CREATE TABLE `transaction_record` (
   PRIMARY KEY (`transaction_id`),
   KEY `idx_user` (`user_id`),
   KEY `idx_status` (`status`),
-  CONSTRAINT `fk_transaction_user` FOREIGN KEY (`user_id`) REFERENCES `user_account` (`user_id`) ON DELETE CASCADE
+  CONSTRAINT `fk_transaction_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -157,13 +157,13 @@ LOCK TABLES `transaction_record` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `user_account`
+-- Table structure for table `user`
 --
 
-DROP TABLE IF EXISTS `user_account`;
+DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_account` (
+CREATE TABLE `user` (
   `user_id` int NOT NULL AUTO_INCREMENT,
   `phone_number` varchar(20) NOT NULL,
   `old_balance` decimal(12,2) DEFAULT '0.00',
@@ -175,13 +175,17 @@ CREATE TABLE `user_account` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `user_account`
+-- Dumping data for table `user`
 --
 
-LOCK TABLES `user_account` WRITE;
-/*!40000 ALTER TABLE `user_account` DISABLE KEYS */;
-INSERT INTO `user_account` VALUES (1,'0780000001',12000.00,11000.00,'personal');
-/*!40000 ALTER TABLE `user_account` ENABLE KEYS */;
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (1,'0780000001',12000.00,41000.00,'personal');
+INSERT INTO `user` VALUES (2,'0780000006',12000.00,11000.00,'personal');
+INSERT INTO `user` VALUES (3,'0780000005',11000.00,11000.00,'personal');
+INSERT INTO `user` VALUES (4,'0780000003',13000.00,21000.00,'personal');
+INSERT INTO `user` VALUES (5,'0780000002',16000.00,31000.00,'personal');
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
