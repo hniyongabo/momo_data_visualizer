@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 
 ROOT_PATH = Path(__file__).resolve().parents[1]
 DEFAULT_XML_PATH = ROOT_PATH / 'modified_sms_v2.xml'
+DEFAULT_OUTPUT_PATH = ROOT_PATH / 'parsed_sms.json'  # the / is used by pathlib to join paths in a OS independent way
 
 _AMOUNT_REGEX = re.compile(r'(?:received|payment of|transferred\s*(?:to)?|deposit of)\s*([\d,]+)\s*RWF', re.IGNORECASE)
 _RAW_AMOUNT_REGEX = re.compile(r'(\d[\d,]*)\s*RWF', re.IGNORECASE)
@@ -205,7 +206,7 @@ def parse_sms_backup(xml_path: Path) -> List[Dict[str, Any]]:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Convert SMS backup into structured JSON.')
     parser.add_argument('-i', '--input', type=Path, default=DEFAULT_XML_PATH, help='Path to modified_sms_v2.xml')
-    parser.add_argument('-o', '--output', type=Path, help='Optional JSON output path')
+    parser.add_argument('-o', '--output', type=Path, default=DEFAULT_OUTPUT_PATH, help='Optional JSON output path')
     return parser.parse_args()
 
 
