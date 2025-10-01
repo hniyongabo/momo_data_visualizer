@@ -1,17 +1,52 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+import base64
 from urllib.parse import urlparse
 # import transactions
-from .parse_sms import parse_sms   
+from dsa.parse_sms import parse_sms_backup   
 
 # Load transactions from parsed XML
-transactions = parse_sms("modified_sms_v2.xml")
+transactions = parse_sms_backup("modified_sms_v2.xml")
+
+# Hardcoded credentials used in this setup
+USERS = {
+    "admin": "password123",
+    "user": "securepass"
+}
+
+
+def check_auth(header):
+    """
+    Check if Authorization header contains valid credentials
+    for any allowed user.
+    """
+    if not header or not header.startswith("Basic "):
+        return False
+
+    encoded = header.split(" ")[1]
+    try:
+        decoded = base64.b64decode(encoded).decode()
+        user, pw = decoded.split(":", 1)
+    except Exception:
+        return False
+
+    return USERS.get(user) == pw
 
 
 class SimpleHandler(BaseHTTPRequestHandler):
     """Handles CRUD operations for MoMo transactions."""
 
-    
+    def _send_auth_required(self):
+        """Send 401 Unauthorized response."""
+        self.send_response(401)
+        self.send_header("WWW-Authenticate", 'Basic realm="MoMo API Transactions"')
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({
+            "error": "Unauthorized",
+            "message": "Incorrect credentials"
+        }).encode())
+
     # Utility methods
 
     def _set_headers(self, status=200):
@@ -34,6 +69,11 @@ class SimpleHandler(BaseHTTPRequestHandler):
     # GET → Retrieve transactions
     
     def do_GET(self):
+        # Check authentication first
+        if not check_auth(self.headers.get("Authorization")):
+            self._send_auth_required()
+            return
+
         parts = self._parse_path()
 
         # GET /transactions → all
@@ -59,6 +99,11 @@ class SimpleHandler(BaseHTTPRequestHandler):
     # POST → Create new transaction
     
     def do_POST(self):
+        # Check authentication first
+        if not check_auth(self.headers.get("Authorization")):
+            self._send_auth_required()
+            return
+        
         parts = self._parse_path()
         if len(parts) == 1 and parts[0] == "transactions":
             data = self._parse_json_body()
@@ -77,6 +122,11 @@ class SimpleHandler(BaseHTTPRequestHandler):
     # PUT → Update existing transaction
     
     def do_PUT(self):
+        # Check authentication first
+        if not check_auth(self.headers.get("Authorization")):
+            self._send_auth_required()
+            return
+        
         parts = self._parse_path()
         if len(parts) == 2 and parts[0] == "transactions":
             txid = parts[1]
@@ -98,6 +148,11 @@ class SimpleHandler(BaseHTTPRequestHandler):
     # DELETE → Remove transaction
     
     def do_DELETE(self):
+        # Check authentication first
+        if not check_auth(self.headers.get("Authorization")):
+            self._send_auth_required()
+            return
+        
         parts = self._parse_path()
         if len(parts) == 2 and parts[0] == "transactions":
             txid = parts[1]
