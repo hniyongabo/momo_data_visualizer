@@ -15,13 +15,13 @@ It has a user-friendly interface for analyzing and visualizing the processed dat
    ```bash
    python3 dsa/parse_sms.py
    ```
-   - Reads `modified_sms_v2.xml` by default.
-   - Writes structured output to `parsed_sms.json` (override with `-o <path>`).
+   - Reads `data/modified_sms_v2.xml` by default.
+   - Writes structured output to `data/parsed_sms.json` (override with `-o <path>`).
 5. **Benchmark search strategies** (optional):
    ```bash
    python3 dsa/search_efficiency.py -n 50 -i 2000
    ```
-   - Compares linear search vs dictionary lookup for the parsed transactions.
+   - Uses `data/parsed_sms.json` as the default dataset.
 6. **Run the prototype API server** (if desired):
    ```bash
    python3 dsa/server.py

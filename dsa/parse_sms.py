@@ -10,8 +10,9 @@ from typing import Any, Dict, Iterable, List, Optional
 import xml.etree.ElementTree as ET
 
 ROOT_PATH = Path(__file__).resolve().parents[1]
-DEFAULT_XML_PATH = ROOT_PATH / 'modified_sms_v2.xml'
-DEFAULT_OUTPUT_PATH = ROOT_PATH / 'parsed_sms.json'  # the / is used by pathlib to join paths in a OS independent way
+DATA_PATH = ROOT_PATH / 'data'
+DEFAULT_XML_PATH = DATA_PATH / 'modified_sms_v2.xml'
+DEFAULT_OUTPUT_PATH = DATA_PATH / 'parsed_sms.json'  # the / is used by pathlib to join paths in a OS independent way
 
 _AMOUNT_REGEX = re.compile(r'(?:received|payment of|transferred\s*(?:to)?|deposit of)\s*([\d,]+)\s*RWF', re.IGNORECASE)
 _RAW_AMOUNT_REGEX = re.compile(r'(\d[\d,]*)\s*RWF', re.IGNORECASE)
@@ -219,6 +220,7 @@ def main() -> None:
     records = parse_sms_backup(xml_path)
 
     if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(records, indent=2, ensure_ascii=False))
     else:
         print(json.dumps(records, indent=2, ensure_ascii=False))
