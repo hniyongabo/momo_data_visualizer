@@ -65,4 +65,5 @@ GROUP BY u.phone_number;
 ## Members 
 - [Habeeb Dindi](https://github.com/dindihabeeb)
 - [Harmony Naomi Niyongabo](https://github.com/hniyongabo)
-- [Kethia Kayigire](https://github.com/kethia19)
+- [Kethia Ngabire Kayigire](https://github.com/kethia19)
+- [Merveille Munana](https://github.com/Munana122)

@@ -6,7 +6,14 @@ from urllib.parse import urlparse
 from dsa.parse_sms import parse_sms_backup   
 
 # Load transactions from parsed XML
-transactions = parse_sms_backup("modified_sms_v2.xml")
+raw_transactions = parse_sms_backup("data/modified_sms_v2.xml")
+
+# Add root-level 'id' field for easier API access
+transactions = []
+for tx in raw_transactions:
+    if "transaction" in tx and "transaction_id" in tx["transaction"]:
+        tx["id"] = tx["transaction"]["transaction_id"]
+    transactions.append(tx)
 
 # Hardcoded credentials used in this setup
 USERS = {
@@ -81,10 +88,10 @@ class SimpleHandler(BaseHTTPRequestHandler):
             self._set_headers()
             self.wfile.write(json.dumps(transactions).encode())
 
-        # GET /transactions/{id} → one
+        # GET /transactions/{id} → 1
         elif len(parts) == 2 and parts[0] == "transactions":
             txid = parts[1]
-            tx = next((t for t in transactions if t["id"] == txid), None)
+            tx = next((t for t in transactions if t.get("id") == txid), None)
             if tx:
                 self._set_headers()
                 self.wfile.write(json.dumps(tx).encode())
@@ -108,8 +115,15 @@ class SimpleHandler(BaseHTTPRequestHandler):
         if len(parts) == 1 and parts[0] == "transactions":
             data = self._parse_json_body()
             # Assign next available ID
-            new_id = str(max([int(t["id"]) for t in transactions], default=0) + 1)
+            existing_ids = [int(t.get("id", 0)) for t in transactions if t.get("id", "").isdigit()]
+            new_id = str(max(existing_ids, default=0) + 1)
             data["id"] = new_id
+            
+            # Setting transaction_id in nested structure if transaction object exists
+            if "transaction" not in data:
+                data["transaction"] = {}
+            data["transaction"]["transaction_id"] = new_id
+            
             transactions.append(data)
 
             self._set_headers(201)
@@ -131,10 +145,14 @@ class SimpleHandler(BaseHTTPRequestHandler):
         if len(parts) == 2 and parts[0] == "transactions":
             txid = parts[1]
             data = self._parse_json_body()
-            tx = next((t for t in transactions if t["id"] == txid), None)
+            tx = next((t for t in transactions if t.get("id") == txid), None)
 
             if tx:
                 tx.update(data)  # Merge updates
+                tx["id"] = txid
+                if "transaction" in tx:
+                    tx["transaction"]["transaction_id"] = txid
+                    
                 self._set_headers()
                 self.wfile.write(json.dumps(tx).encode())
             else:
@@ -157,7 +175,7 @@ class SimpleHandler(BaseHTTPRequestHandler):
         if len(parts) == 2 and parts[0] == "transactions":
             txid = parts[1]
             global transactions
-            new_transactions = [t for t in transactions if t["id"] != txid]
+            new_transactions = [t for t in transactions if t.get("id") != txid]
 
             if len(new_transactions) != len(transactions):
                 transactions[:] = new_transactions
