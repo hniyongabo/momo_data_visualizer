@@ -2,6 +2,32 @@
 This is an enterprise-level fullstack application that processes MoMo SMS data in XML format, cleans and categorizes the data and stores it in a relational database. 
 It has a user-friendly interface for analyzing and visualizing the processed data as well as uploading raw xml data.
 
+## Setup Instructions
+
+1. **Install Python**: Ensure Python 3.10 or newer is available (`python3 --version`).
+2. **Create a virtual environment** (recommended):
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+3. **Install dependencies**: The current tooling relies only on the standard library. If new packages are added, pin them in `requirements.txt` and install with `pip install -r requirements.txt`.
+4. **Parse the SMS backup** to JSON:
+   ```bash
+   python3 dsa/parse_sms.py
+   ```
+   - Reads `modified_sms_v2.xml` by default.
+   - Writes structured output to `parsed_sms.json` (override with `-o <path>`).
+5. **Benchmark search strategies** (optional):
+   ```bash
+   python3 dsa/search_efficiency.py -n 50 -i 2000
+   ```
+   - Compares linear search vs dictionary lookup for the parsed transactions.
+6. **Run the prototype API server** (if desired):
+   ```bash
+   python3 dsa/server.py
+   ```
+   - Exposes simple CRUD endpoints at `http://localhost:8000/transactions` for experimentation.
+
 ## Architecture Diagram
 ![Image](https://github.com/user-attachments/assets/41ecdc4d-067e-4c19-9790-126cf353f0e4)
 
